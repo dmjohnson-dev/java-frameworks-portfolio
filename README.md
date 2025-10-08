@@ -24,3 +24,10 @@ For this project, you will use the Integrated Development Environment (IDE) link
 If you need additional support, please navigate to the course page and reach out to your course instructor.
 ## FUTURE USE
 Take this opportunity to create or add to a simple resume portfolio to highlight and showcase your work for future use in career search, experience, and education!
+## Where to find my changes (Parts C–J)
+
+| Prompt | File(s) | Line(s) | What I changed |
+|---|---|---|---|
+| **C. Customize HTML UI** | `src/main/resources/templates/mainscreen.html` | L??–?? | Branded UI as **“Custom PC Workshop”**; added header + nav (Home/About) and section headings above Parts/Products tables. Kept all original elements. |
+|  | `src/main/resources/static/css/style.css` | all | New stylesheet for basic branding/layout. |
+|  | `src/main/java/com/example/demo/controllers/MainScreenController.java` | L??–?? | Controller mapping for `/` and `/mainscreen` returning `mainscreen`. |
