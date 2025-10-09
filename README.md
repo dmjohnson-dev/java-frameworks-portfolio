@@ -45,3 +45,6 @@ E. Sample inventory
     - GET "/" and "/mainscreen" now load parts and products into the model so the UI lists show seeded data.
 - templates/mainscreen.html
     - Iterates over ${parts} and ${products} to display the seeded inventory.
+F. Buy Now
+- controllers/ProductController.java: Added /buyProduct endpoint that decrements product inventory by 1 (parts unaffected) and sets flash success/failure messages.
+- templates/mainscreen.html: Added Buy Now button next to Update/Delete in Products table; alert banner displays purchase result; button disabled when inventory is 0.

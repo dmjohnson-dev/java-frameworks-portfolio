@@ -3,25 +3,16 @@ package com.example.demo.domain;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-/**
- *
- *
- *
- *
- */
 @Entity
 @DiscriminatorValue("1")
-public class InhousePart extends Part{
-    int partId;
+public class InhousePart extends Part {
 
-    public InhousePart() {
-    }
+    private Integer partId;
 
-    public int getPartId() {
+    public Integer getPartId() {
         return partId;
     }
-
-    public void setPartId(int partId) {
+    public void setPartId(Integer partId) {
         this.partId = partId;
     }
 }

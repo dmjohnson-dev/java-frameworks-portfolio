@@ -1,13 +1,16 @@
 package com.example.demo.bootstrap;
 
-import com.example.demo.domain.Part;
-import com.example.demo.domain.Product;
 import com.example.demo.domain.InhousePart;
 import com.example.demo.domain.OutsourcedPart;
+import com.example.demo.domain.Part;
+import com.example.demo.domain.Product;
 import com.example.demo.repositories.PartRepository;
 import com.example.demo.repositories.ProductRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class SampleDataLoader implements CommandLineRunner {
@@ -22,50 +25,49 @@ public class SampleDataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        System.out.println("Started in SampleDataLoader");
-        long partCount = partRepo.count();
+        System.out.println("Started in Bootstrap");
         long productCount = productRepo.count();
-        System.out.println("Existing parts: " + partCount + ", products: " + productCount);
+        long partCount = partRepo.count();
+        System.out.println("Number of Products " + productCount);
+        System.out.println("Number of Parts " + partCount);
 
-        // Only seed when BOTH are empty (per requirement)
-        if (partCount == 0 && productCount == 0) {
+        // Seed ONLY if both are empty (per requirement)
+        if (productCount == 0 && partCount == 0) {
             seed();
-        } else {
-            System.out.println("Skipping sample data seeding (database not empty).");
         }
     }
 
     private void seed() {
-        // ----- 5 Parts -----
+        // ----- Create Parts (5 total) -----
         InhousePart cpu = new InhousePart();
-        cpu.setName("Ryzen 5 7600");
+        cpu.setName("Ryzen 5 CPU");
         cpu.setPrice(199.99);
-        cpu.setInv(25);
-        cpu.setPartId(7600);
+        cpu.setMin(2); cpu.setMax(50); cpu.setInv(10);
+        cpu.setPartId(5601);
 
         InhousePart ram = new InhousePart();
-        ram.setName("16GB DDR5 Kit");
+        ram.setName("16GB DDR4 RAM");
         ram.setPrice(59.99);
-        ram.setInv(50);
-        ram.setPartId(16005);
+        ram.setMin(2); ram.setMax(100); ram.setInv(60);
+        ram.setPartId(7702);
 
         OutsourcedPart ssd = new OutsourcedPart();
         ssd.setName("1TB NVMe SSD");
-        ssd.setPrice(79.99);
-        ssd.setInv(40);
-        ssd.setCompanyName("FlashCore");
+        ssd.setPrice(89.99);
+        ssd.setMin(2); ssd.setMax(80); ssd.setInv(40);
+        ssd.setCompanyName("StorageCo");
 
         OutsourcedPart gpu = new OutsourcedPart();
-        gpu.setName("GeForce RTX 4060");
-        gpu.setPrice(299.99);
-        gpu.setInv(15);
-        gpu.setCompanyName("Nvidia Partner");
+        gpu.setName("GeForce GTX 1660");
+        gpu.setPrice(229.99);
+        gpu.setMin(2); gpu.setMax(30); gpu.setInv(12);
+        gpu.setCompanyName("Graphix Ltd");
 
-        InhousePart psu = new InhousePart();
-        psu.setName("650W 80+ Gold PSU");
-        psu.setPrice(89.99);
-        psu.setInv(30);
-        psu.setPartId(65080);
+        OutsourcedPart psu = new OutsourcedPart();
+        psu.setName("600W Power Supply");
+        psu.setPrice(69.99);
+        psu.setMin(2); psu.setMax(60); psu.setInv(35);
+        psu.setCompanyName("PowerMax");
 
         partRepo.save(cpu);
         partRepo.save(ram);
@@ -73,69 +75,40 @@ public class SampleDataLoader implements CommandLineRunner {
         partRepo.save(gpu);
         partRepo.save(psu);
 
-        // ----- 5 Products (Set prevents duplicate parts) -----
-        Product budgetPC  = new Product("Budget PC",  649.99, 10);
-        addPartsWithMultipack(budgetPC, cpu, ram, ssd, psu);
+        // ----- Create Products (5 total) -----
+        Product budget = new Product("Budget PC", 599.99, 10);
+        Product gaming = new Product("Gaming PC", 1099.99, 5);
+        Product creator = new Product("Creator PC", 1299.99, 3);
+        Product office = new Product("Office PC", 499.99, 8);
+        Product mini = new Product("Mini PC", 399.99, 12);
 
-        Product gamingPC  = new Product("Gaming PC", 1299.99, 6);
-        addPartsWithMultipack(gamingPC, cpu, ram, ssd, gpu, psu);
+        // ----- Associate Parts (use Set so duplicates are ignored) -----
+        Set<Part> budgetParts = new HashSet<>();
+        budgetParts.add(cpu); budgetParts.add(ram); budgetParts.add(ssd);
+        budget.setParts(budgetParts);
 
-        Product creatorPC = new Product("Creator PC", 1499.99, 4);
-        // duplicate ram on purpose → multipack
-        addPartsWithMultipack(creatorPC, cpu, ram, ssd, gpu, psu, ram);
+        Set<Part> gamingParts = new HashSet<>();
+        gamingParts.add(cpu); gamingParts.add(ram); gamingParts.add(ssd); gamingParts.add(gpu); gamingParts.add(psu);
+        gaming.setParts(gamingParts);
 
-        Product officePC  = new Product("Office PC",  699.99, 8);
-        addPartsWithMultipack(officePC, cpu, ram, ssd, psu);
+        Set<Part> creatorParts = new HashSet<>();
+        creatorParts.add(cpu); creatorParts.add(ram); creatorParts.add(ssd); creatorParts.add(gpu);
+        creator.setParts(creatorParts);
 
-        Product miniPC    = new Product("Mini PC",    599.99, 5);
-        addPartsWithMultipack(miniPC, cpu, ram, ssd, psu);
+        Set<Part> officeParts = new HashSet<>();
+        officeParts.add(cpu); officeParts.add(ram); officeParts.add(psu);
+        office.setParts(officeParts);
 
-        productRepo.save(budgetPC);
-        productRepo.save(gamingPC);
-        productRepo.save(creatorPC);
-        productRepo.save(officePC);
-        productRepo.save(miniPC);
+        Set<Part> miniParts = new HashSet<>();
+        miniParts.add(ram); miniParts.add(ssd); miniParts.add(psu);
+        mini.setParts(miniParts);
 
-        System.out.println("Sample inventory seeded: 5 parts, 5 products.");
-    }
+        productRepo.save(budget);
+        productRepo.save(gaming);
+        productRepo.save(creator);
+        productRepo.save(office);
+        productRepo.save(mini);
 
-    /** Adds parts; if a duplicate is detected, create a 2-pack variant of the same subtype. */
-    private void addPartsWithMultipack(Product product, Part... parts) {
-        for (Part p : parts) {
-            boolean added = product.addPart(p); // Product.addPart uses Set.add under the hood
-            if (!added) {
-                Part multi = makeMultiPack(p, 2);
-                multi = partRepo.save(multi); // persist so it has its own id
-                product.addPart(multi);
-            }
-        }
-    }
-
-    /** Never instantiate abstract Part. Always clone as the same concrete subtype. */
-    private Part makeMultiPack(Part original, int k) {
-        String newName = original.getName() + " (" + k + "-Pack)";
-        double newPrice = Math.round(original.getPrice() * k * 100.0) / 100.0;
-
-        if (original instanceof InhousePart) {
-            InhousePart src = (InhousePart) original;
-            InhousePart mp = new InhousePart();
-            mp.setName(newName);
-            mp.setPrice(newPrice);
-            mp.setInv(src.getInv());
-            mp.setPartId(src.getPartId()); // reuse; adjust if you enforce uniqueness
-            return mp;
-        } else if (original instanceof OutsourcedPart) {
-            OutsourcedPart src = (OutsourcedPart) original;
-            OutsourcedPart mp = new OutsourcedPart();
-            mp.setName(newName);
-            mp.setPrice(newPrice);
-            mp.setInv(src.getInv());
-            mp.setCompanyName(src.getCompanyName());
-            return mp;
-        } else {
-            throw new IllegalArgumentException("Unsupported Part subtype for multipack: " + original.getClass().getName());
-        }
+        System.out.println("Sample data seeded.");
     }
 }
-
-
