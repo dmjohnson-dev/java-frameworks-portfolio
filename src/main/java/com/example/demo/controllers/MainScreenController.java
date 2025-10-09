@@ -11,4 +11,9 @@ public class MainScreenController {
         // Renders src/main/resources/templates/mainscreen.html
         return "mainscreen";
     }
+    @GetMapping("/about")
+    public String about() {
+        return "about"; // renders src/main/resources/templates/about.html
+    }
+
 }

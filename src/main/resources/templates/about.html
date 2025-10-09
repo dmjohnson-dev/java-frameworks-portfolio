@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>About – Custom PC Workshop</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+<header class="site-header">
+    <h1>Custom PC Workshop</h1>
+    <nav>
+        <a th:href="@{/mainscreen}">Home</a>
+        <a th:href="@{/about}" aria-current="page">About</a>
+    </nav>
+</header>
+
+<main>
+    <h2>About Custom PC Workshop</h2>
+    <p>
+        Custom PC Workshop specializes in building and maintaining high-performance desktop PCs.
+        We track our inventory of parts (CPUs, GPUs, RAM, storage, PSUs, cases)
+        and assemble complete products tailored to customer needs.
+    </p>
+
+    <h3>What this app does</h3>
+    <ul>
+        <li>Manage parts and finished products</li>
+        <li>Edit, search, and maintain inventory levels</li>
+        <li>Prepare for purchasing and fulfillment workflows</li>
+    </ul>
+
+    <p>
+        Ready to manage inventory? <a th:href="@{/mainscreen}">Go back to the main screen</a>.
+    </p>
+</main>
+</body>
+</html>
