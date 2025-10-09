@@ -31,3 +31,6 @@ Take this opportunity to create or add to a simple resume portfolio to highlight
 | **C. Customize HTML UI** | `src/main/resources/templates/mainscreen.html` | L??–?? | Branded UI as **“Custom PC Workshop”**; added header + nav (Home/About) and section headings above Parts/Products tables. Kept all original elements. |
 |  | `src/main/resources/static/css/style.css` | all | New stylesheet for basic branding/layout. |
 |  | `src/main/java/com/example/demo/controllers/MainScreenController.java` | L??–?? | Controller mapping for `/` and `/mainscreen` returning `mainscreen`. |
+| D. About page | src/main/java/com/example/demo/controllers/MainScreenController.java | L??–?? | Added @GetMapping("/about") returning "about". |
+|               | src/main/resources/templates/about.html | all | New About page; includes nav back to mainscreen. |
+|               | src/main/resources/templates/mainscreen.html | L??–?? | Ensured nav link to About (and Home) exists. |

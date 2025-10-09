@@ -6,33 +6,36 @@ import com.example.demo.validators.ValidProductPrice;
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
-/**
- *
- *
- *
- *
- */
 @Entity
-@Table(name="Products")
+@Table(name = "products")
 @ValidProductPrice
 @ValidEnufParts
 public class Product implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    long id;
-    String name;
-    @Min(value = 0, message = "Price value must be positive")
-    double price;
-    @Min(value = 0, message = "Inventory value must be positive")
-    int inv;
-    @ManyToMany(cascade=CascadeType.ALL, mappedBy = "products")
-    Set<Part> parts= new HashSet<>();
+    private long id;
 
-    public Product() {
-    }
+    private String name;
+
+    @Min(value = 0, message = "Price value must be positive")
+    private double price;
+
+    @Min(value = 0, message = "Inventory value must be positive")
+    private int inv;
+
+    @ManyToMany
+    @JoinTable(
+            name = "product_part",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "part_id")
+    )
+    private Set<Part> parts = new LinkedHashSet<>();
+
+    public Product() {}
 
     public Product(String name, double price, int inv) {
         this.name = name;
@@ -47,57 +50,34 @@ public class Product implements Serializable {
         this.inv = inv;
     }
 
-    public long getId() {
-        return id;
+    /** Adds a part; Set prevents duplicates. */
+    public boolean addPart(Part p) {
+        return parts.add(p);
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
+    // Getters / setters
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 
-    public double getPrice() {
-        return price;
-    }
+    public int getInv() { return inv; }
+    public void setInv(int inv) { this.inv = inv; }
 
-    public void setPrice(double price) {
-        this.price = price;
-    }
+    public Set<Part> getParts() { return parts; }
+    public void setParts(Set<Part> parts) { this.parts = parts; }
 
-    public int getInv() {
-        return inv;
-    }
+    @Override public String toString() { return this.name; }
 
-    public void setInv(int inv) {
-        this.inv = inv;
-    }
-
-    public Set<Part> getParts() {
-        return parts;
-    }
-
-    public void setParts(Set<Part> parts) {
-        this.parts = parts;
-    }
-
-    public String toString(){
-        return this.name;
-    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Product product = (Product) o;
-
-        return id == product.id;
+        if (!(o instanceof Product)) return false;
+        return id == ((Product) o).id;
     }
 
     @Override
