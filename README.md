@@ -34,3 +34,14 @@ Take this opportunity to create or add to a simple resume portfolio to highlight
 | D. About page | src/main/java/com/example/demo/controllers/MainScreenController.java | L??–?? | Added @GetMapping("/about") returning "about". |
 |               | src/main/resources/templates/about.html | all | New About page; includes nav back to mainscreen. |
 |               | src/main/resources/templates/mainscreen.html | L??–?? | Ensured nav link to About (and Home) exists. |
+E. Sample inventory
+- bootstrap/SampleDataLoader.java
+    - Seeds 5 parts and 5 products ONLY when both tables are empty (see run() and seed()).
+    - addPartsWithMultipack(): when a duplicate part is added to a product, creates a "(2-Pack)" variant of the same subtype and associates that instead.
+- domain/Product.java
+    - parts field changed to Set<Part> with @ManyToMany via product_part join table.
+    - addPart(Part): returns Set.add result to prevent duplicates.
+- controllers/MainScreenController.java
+    - GET "/" and "/mainscreen" now load parts and products into the model so the UI lists show seeded data.
+- templates/mainscreen.html
+    - Iterates over ${parts} and ${products} to display the seeded inventory.

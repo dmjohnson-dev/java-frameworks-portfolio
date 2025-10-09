@@ -25,6 +25,9 @@
 </header>
 
 <div class="container">
+    <div th:if="${message}" th:class="'alert alert-' + ${messageType}" role="alert"
+         th:text="${message}"></div>
+
     <h1>Shop</h1>
     <hr>
 
@@ -69,27 +72,21 @@
 
     <!-- PRODUCTS -->
     <h2>Products (Complete PC Builds)</h2>
+
     <form th:action="@{/mainscreen}">
         Filter:
-        <input type="text" name="productkeyword" id="productkeyword" size="50" th:value="${productkeyword}" required />
+        <input type="text" name="productkeyword" id="productkeyword" size="50" th:value="${productkeyword}">
         &nbsp;
         <input type="submit" value="Search" />
         &nbsp;
         <input type="button" value="Clear" id="btnClearProduct" onclick="clearSearch()" />
-        <!-- removed duplicate <h2>Products ...> here -->
     </form>
 
-    <script type="text/javascript">
-        function clearSearch() {
-            window.location = "[[@{/}]]";
-        }
-    </script>
-
     <br><br>
-    <a th:href="@{/showFormAddProduct}" class="btn btn-success btn-sm mb-3">Add Product</a>
+    <a th:href="@{/showFormAddProduct}" class="btn btn-primary btn-sm mb-3">Add Product</a>
 
     <table class="table table-bordered table-striped">
-        <thead class="table-dark">
+        <thead class="thead-dark">
         <tr>
             <th>Name</th>
             <th>Price</th>
@@ -98,19 +95,38 @@
         </tr>
         </thead>
         <tbody>
+        <!-- Exactly one row per product -->
         <tr th:each="tempProduct : ${products}">
-            <td th:text="${tempProduct.name}">1</td>
-            <td th:text="${tempProduct.price}">1</td>
-            <td th:text="${tempProduct.inv}">1</td>
+            <td th:text="${tempProduct.name}">Product Name</td>
+            <td th:text="${tempProduct.price}">0.00</td>
+            <td th:text="${tempProduct.inv}">0</td>
             <td>
-                <a th:href="@{/showProductFormForUpdate(productID=${tempProduct.id})}" class="btn btn-primary btn-sm mb-3">Update</a>
-                <a th:href="@{/deleteproduct(productID=${tempProduct.id})}" class="btn btn-danger btn-sm mb-3"
-                   onclick="if(!(confirm('Are you sure you want to delete this product?'))) return false">Delete</a>
+                <a th:href="@{/showProductFormForUpdate(productID=${tempProduct.id})}"
+                   class="btn btn-primary btn-sm mb-2">Update</a>
+
+                <a th:href="@{/deleteproduct(productID=${tempProduct.id})}"
+                   class="btn btn-danger btn-sm mb-2"
+                   onclick="if(!(confirm('Are you sure you want to delete this product?')))return false">Delete</a>
+
+                <!-- Single Buy Now button -->
+                <a th:href="@{|/buyProduct?productID=${tempProduct.id}|}"
+                   class="btn btn-success btn-sm"
+                   th:classappend="${tempProduct.inv == 0} ? ' disabled' : ''"
+                   th:attr="aria-disabled=${tempProduct.inv == 0}">
+                    Buy Now
+                </a>
             </td>
+
+
         </tr>
         </tbody>
     </table>
-</div>
 
-</body>
-</html>
+    <script type="text/javascript">
+        function clearSearch() {
+            window.location = "[[@{/mainscreen}]]";
+        }
+    </script>
+
+
+
