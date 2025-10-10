@@ -48,3 +48,9 @@ E. Sample inventory
 F. Buy Now
 - controllers/ProductController.java: Added /buyProduct endpoint that decrements product inventory by 1 (parts unaffected) and sets flash success/failure messages.
 - templates/mainscreen.html: Added Buy Now button next to Update/Delete in Products table; alert banner displays purchase result; button disabled when inventory is 0.
+  G. Modify Parts to Track Min/Max
+- domain/Part.java: Added fields min and max with getters/setters.
+- controllers/AddPartController.java: Enforce Max >= Min and Min ≤ Inv ≤ Max on save (both in-house and outsourced).
+- templates/InhousePartForm.html & OutsourcedPartForm.html: Added Min and Max inputs; show validation errors.
+- bootstrap/SampleDataLoader.java: Seed 5 parts with min/max (runs only when both part and product lists are empty).
+- resources/application.properties: Renamed H2 file to jdbc:h2:file:~/d287-inventory-db.

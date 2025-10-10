@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import com.example.demo.domain.Part;
 import com.example.demo.domain.Product;
 import com.example.demo.repositories.ProductRepository;
 import org.springframework.stereotype.Controller;
@@ -20,25 +21,21 @@ public class AddProductController {
         this.productRepository = productRepository;
     }
 
-    // ===== ADD FORM =====
     @GetMapping("/showFormAddProduct")
     public String showFormAddProduct(Model model) {
         model.addAttribute("product", new Product());
-        return "ProductForm"; // template must exist at templates/ProductForm.html
+        return "ProductForm";
     }
 
-    // ===== EDIT FORM =====
     @GetMapping("/showProductFormForUpdate")
     public String showProductFormForUpdate(@RequestParam("productID") long id, Model model) {
         Optional<Product> opt = productRepository.findById(id);
-        if (!opt.isPresent()) {
-            return "redirect:/mainscreen";
-        }
+        if (opt.isEmpty()) return "redirect:/mainscreen";
         model.addAttribute("product", opt.get());
         return "ProductForm";
     }
 
-    // ===== SAVE (CREATE/UPDATE) =====
+    // Save Product with Part H validation (product lowering parts below min)
     @PostMapping("/saveProduct")
     public String saveProduct(@Valid @ModelAttribute("product") Product product,
                               BindingResult result,
@@ -50,20 +47,41 @@ public class AddProductController {
         if (product.getInv() < 0) {
             result.rejectValue("inv", "invNegative", "Inventory must be ≥ 0");
         }
+        if (result.hasErrors()) return "ProductForm";
 
-        if (result.hasErrors()) {
-            return "ProductForm";
+        // Compute delta in product inv to see if parts would be over-used
+        int delta;
+        if (product.getId() == 0) {
+            delta = product.getInv();
+        } else {
+            int currentInv = productRepository.findById(product.getId())
+                    .map(Product::getInv).orElse(0);
+            delta = product.getInv() - currentInv;
         }
+
+        // Simple 1:1 parts consumption rule
+        if (delta > 0 && product.getParts() != null && !product.getParts().isEmpty()) {
+            for (Part p : product.getParts()) {
+                int projectedPartInv = p.getInv() - delta;
+                if (projectedPartInv < p.getMin()) {
+                    result.reject("partInvBelowMin",
+                            "Cannot set Product inventory to " + product.getInv()
+                                    + ": Part '" + p.getName()
+                                    + "' would drop below its minimum (" + p.getMin() + ").");
+                    break;
+                }
+            }
+        }
+
+        if (result.hasErrors()) return "ProductForm";
 
         productRepository.save(product);
         ra.addFlashAttribute("message", "Product saved.");
         return "redirect:/mainscreen";
     }
 
-    // ===== DELETE =====
     @GetMapping("/deleteproduct")
-    public String deleteProduct(@RequestParam("productID") long id,
-                                RedirectAttributes ra) {
+    public String deleteProduct(@RequestParam("productID") long id, RedirectAttributes ra) {
         if (productRepository.existsById(id)) {
             productRepository.deleteById(id);
             ra.addFlashAttribute("message", "Product deleted.");
@@ -73,26 +91,22 @@ public class AddProductController {
         return "redirect:/mainscreen";
     }
 
-    // ===== PART F: BUY NOW =====
+    // Part F: Buy Now (decrement only product inv, not parts)
     @GetMapping("/buyProduct")
-    public String buyProduct(@RequestParam("productID") long id,
-                             RedirectAttributes ra) {
+    public String buyProduct(@RequestParam("productID") long id, RedirectAttributes ra) {
         Optional<Product> opt = productRepository.findById(id);
-        if (!opt.isPresent()) {
+        if (opt.isEmpty()) {
             ra.addFlashAttribute("message", "Purchase failed: product not found.");
             return "redirect:/mainscreen";
         }
-
         Product p = opt.get();
         if (p.getInv() <= 0) {
             ra.addFlashAttribute("message", "Purchase failed: out of stock.");
             return "redirect:/mainscreen";
         }
-
-        p.setInv(p.getInv() - 1);      // decrement product inventory ONLY
+        p.setInv(p.getInv() - 1);
         productRepository.save(p);
         ra.addFlashAttribute("message", "Purchase successful! Remaining inventory: " + p.getInv());
         return "redirect:/mainscreen";
     }
 }
-

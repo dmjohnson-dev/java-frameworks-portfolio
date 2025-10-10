@@ -1,7 +1,6 @@
 package com.example.demo.domain;
 
 import javax.persistence.*;
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Min;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -19,21 +18,20 @@ public abstract class Part implements Serializable {
 
     private String name;
 
-    @Min(0)
+    @Min(value = 0, message = "Price must be ≥ 0")
     private double price;
 
-    @Min(0)
+    @Min(value = 0, message = "Inventory must be ≥ 0")
     private int inv;
 
-    @Min(0)
+    @Min(value = 0, message = "Min must be ≥ 0")
     @Column(name = "min")
-    private int min = 0;
+    private int min = 2;   // default to 2 (Part G)
 
-    @Min(0)
+    @Min(value = 0, message = "Max must be ≥ 0")
     @Column(name = "max")
-    private int max = Integer.MAX_VALUE;
+    private int max = 10;  // reasonable default
 
-    // Owning side of many-to-many (matches product_part table)
     @ManyToMany
     @JoinTable(
             name = "product_part",
@@ -42,8 +40,15 @@ public abstract class Part implements Serializable {
     )
     private Set<Product> products = new HashSet<>();
 
-    // ----- getters / setters -----
+    // --- lifecycle: ensure min default at persist ---
+    @PrePersist
+    public void prePersist() {
+        if (min <= 0) min = 2; // per requirement: minimums are 2
+        if (max < min) max = min;
+        if (inv < 0) inv = 0;
+    }
 
+    // --- getters/setters ---
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 
@@ -54,60 +59,14 @@ public abstract class Part implements Serializable {
     public void setPrice(double price) { this.price = price; }
 
     public int getInv() { return inv; }
-    public void setInv(int inv) {
-        this.inv = inv;
-        // keep inventory within [min, max]
-        if (this.max < this.min) this.max = this.min;
-        if (this.inv < this.min) this.inv = this.min;
-        if (this.inv > this.max) this.inv = this.max;
-    }
+    public void setInv(int inv) { this.inv = inv; }
 
     public int getMin() { return min; }
-    public void setMin(int min) {
-        this.min = Math.max(0, min);
-        if (this.max < this.min) this.max = this.min;
-        if (this.inv < this.min) this.inv = this.min;
-    }
+    public void setMin(int min) { this.min = min; }
 
     public int getMax() { return max; }
-    public void setMax(int max) {
-        this.max = Math.max(0, max);
-        if (this.max < this.min) this.max = this.min;
-        if (this.inv > this.max) this.inv = this.max;
-    }
+    public void setMax(int max) { this.max = max; }
 
     public Set<Product> getProducts() { return products; }
     public void setProducts(Set<Product> products) { this.products = products; }
-
-    // ----- bean validation helpers (used in Part H too) -----
-
-    @AssertTrue(message = "Max must be greater than or equal to Min")
-    public boolean isMaxGteMin() {
-        return max >= min;
-    }
-
-    @AssertTrue(message = "Inventory must be between Min and Max")
-    public boolean isInvWithinBounds() {
-        return inv >= min && inv <= max;
-    }
-
-    // ----- utility -----
-
-    @Override
-    public String toString() {
-        return name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Part)) return false;
-        Part part = (Part) o;
-        return id == part.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return (int) (id ^ (id >>> 32));
-    }
 }
