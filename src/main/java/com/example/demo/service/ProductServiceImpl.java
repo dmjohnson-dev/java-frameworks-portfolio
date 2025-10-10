@@ -1,69 +1,35 @@
 package com.example.demo.service;
 
-import com.example.demo.domain.Part;
 import com.example.demo.domain.Product;
-import com.example.demo.repositories.PartRepository;
 import com.example.demo.repositories.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
-/**
- *
- *
- *
- *
- */
 @Service
-public class ProductServiceImpl implements ProductService{
-    private ProductRepository productRepository;
+@Transactional
+public class ProductServiceImpl implements ProductService {
 
-    @Autowired
+    private final ProductRepository productRepository;
 
     public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
-    @Override
-    public List<Product> findAll() {
-        return (List<Product>) productRepository.findAll();
+    @Override public List<Product> findAll() { return productRepository.findAll(); }
+
+    @Override public Product findById(Long id) {
+        return productRepository.findById(id).orElse(null);
     }
 
-    @Override
-    public Product findById(int theId) {
-        Long theIdl=(long)theId;
-        Optional<Product> result = productRepository.findById(theIdl);
+    @Override public Product save(Product product) { return productRepository.save(product); }
 
-        Product theProduct = null;
+    @Override public void deleteById(Long id) { productRepository.deleteById(id); }
 
-        if (result.isPresent()) {
-            theProduct = result.get();
-        }
-        else {
-            // we didn't find the product id
-            throw new RuntimeException("Did not find part id - " + theId);
-        }
-
-        return theProduct;
-    }
-
-    @Override
-    public void save(Product theProduct) {
-        productRepository.save(theProduct);
-
-    }
-
-    @Override
-    public void deleteById(int theId) {
-        Long theIdl=(long)theId;
-        productRepository.deleteById(theIdl);
-    }
-    public List<Product> listAll(String keyword){
-        if(keyword !=null){
-            return productRepository.search(keyword);
-        }
-        return (List<Product>) productRepository.findAll();
+    @Override public List<Product> searchByName(String keyword) {
+        if (keyword == null || keyword.isBlank()) return productRepository.findAll();
+        return productRepository.findByNameContainingIgnoreCase(keyword);
     }
 }
+

@@ -112,17 +112,17 @@ class ProductTest {
 
     @Test
     void testEquals() {
-        product.setId(1l);
+        product.setId(1L);
         Product newProduct= new Product();
-        newProduct.setId(1l);
+        newProduct.setId(1L);
         assertEquals(product,newProduct);
     }
 
     @Test
     void testHashCode() {
-        product.setId(1l);
+        product.setId(1L);
         Product newProduct= new Product();
-        newProduct.setId(1l);
+        newProduct.setId(1L);
         assertEquals(product.hashCode(),newProduct.hashCode());
     }
 }

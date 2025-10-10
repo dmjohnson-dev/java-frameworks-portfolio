@@ -9,10 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
 @Controller
 public class MainScreenController {
@@ -26,41 +23,27 @@ public class MainScreenController {
     }
 
     @GetMapping({"/", "/mainscreen"})
-    public String main(@RequestParam(value = "partkeyword", required = false) String partkeyword,
-                       @RequestParam(value = "productkeyword", required = false) String productkeyword,
-                       Model model) {
+    public String showMain(
+            @RequestParam(value = "partkeyword", defaultValue = "") String partkeyword,
+            @RequestParam(value = "productkeyword", defaultValue = "") String productkeyword,
+            Model model) {
 
-        // Iterable -> List (works with CrudRepository)
-        List<Part> parts = new ArrayList<>();
-        for (Part p : partRepository.findAll()) parts.add(p);
-        parts.sort(Comparator.comparing(Part::getName, String.CASE_INSENSITIVE_ORDER));
+        // parts list
+        final List<Part> parts = partkeyword.isBlank()
+                ? partRepository.findAll()
+                : partRepository.findByNameContainingIgnoreCase(partkeyword);
 
-        List<Product> products = new ArrayList<>();
-        for (Product pr : productRepository.findAll()) products.add(pr);
-        products.sort(Comparator.comparing(Product::getName, String.CASE_INSENSITIVE_ORDER));
-
-        // Filter
-        if (partkeyword != null && !partkeyword.isBlank()) {
-            String k = partkeyword.toLowerCase(Locale.ROOT);
-            List<Part> filtered = new ArrayList<>();
-            for (Part p : parts) {
-                if (p.getName() != null && p.getName().toLowerCase(Locale.ROOT).contains(k)) filtered.add(p);
-            }
-            parts = filtered;
-        }
-        if (productkeyword != null && !productkeyword.isBlank()) {
-            String k = productkeyword.toLowerCase(Locale.ROOT);
-            List<Product> filtered = new ArrayList<>();
-            for (Product pr : products) {
-                if (pr.getName() != null && pr.getName().toLowerCase(Locale.ROOT).contains(k)) filtered.add(pr);
-            }
-            products = filtered;
-        }
+        // products list
+        final List<Product> products = productkeyword.isBlank()
+                ? productRepository.findAll()
+                : productRepository.findByNameContainingIgnoreCase(productkeyword);
 
         model.addAttribute("parts", parts);
         model.addAttribute("products", products);
         model.addAttribute("partkeyword", partkeyword);
         model.addAttribute("productkeyword", productkeyword);
-        return "mainScreen";
+
+        // IMPORTANT: must match src/main/resources/templates/mainscreen.html
+        return "mainscreen";
     }
 }

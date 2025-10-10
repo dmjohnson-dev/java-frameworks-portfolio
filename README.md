@@ -54,3 +54,26 @@ F. Buy Now
 - templates/InhousePartForm.html & OutsourcedPartForm.html: Added Min and Max inputs; show validation errors.
 - bootstrap/SampleDataLoader.java: Seed 5 parts with min/max (runs only when both part and product lists are empty).
 - resources/application.properties: Renamed H2 file to jdbc:h2:file:~/d287-inventory-db.
+
+
+### Part H – Validation (min/max)
+- **Files:**
+    - Controllers: `AddPartController.java` (validateMinMax), `AddProductController.java` (saveProduct)
+    - Templates: `InhousePartForm.html`, `OutsourcedPartForm.html`, `ProductForm.html`
+- **What changed:**
+    - Added cross-field checks in `AddPartController#validateMinMax`:
+        - error if `inv < min`,
+        - error if `inv > max`,
+        - error if `max < min`.
+    - In `AddProductController#saveProduct`, when increasing product inventory, we ensure associated parts would not drop below their `min`. Shows form errors when violated.
+
+### Part I – Unit tests
+- **Files:** `src/test/java/com/example/demo/domain/PartTest.java`
+- **What changed:**
+    - Added 2 tests that cover invalid conditions for inventory relative to min/max.
+    - These conditions are handled by controller validation in runtime.
+
+### Part J – Cleanup
+- **Files removed:** Any unused validator classes and annotations (e.g., `ValidProductPrice`, `ValidEnufParts`) that are no longer referenced.
+- **What changed:**
+    - Removed unused validators to simplify code; validation now happens in controllers and forms as described in Part H.
