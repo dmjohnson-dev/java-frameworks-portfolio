@@ -24,3 +24,58 @@ For this project, you will use the Integrated Development Environment (IDE) link
 If you need additional support, please navigate to the course page and reach out to your course instructor.
 ## FUTURE USE
 Take this opportunity to create or add to a simple resume portfolio to highlight and showcase your work for future use in career search, experience, and education!
+## Where to find my changes (Parts C–J)
+
+Part C — Customize HTML UI (shop name, product/part names)
+Prompt	File	Line(s)	Change
+Add shop name, keep all existing UI	src/main/resources/templates/MainScreen.html	~15–29	Added header block with Custom PC Workshop and nav links. <!-- [C] header -->
+Add section headings for Parts/Products	src/main/resources/templates/MainScreen.html	~55, ~97	Added <h2>Parts (Computer Components)</h2> and <h2>Products (Complete PC Builds)</h2> labels.
+Add CSS	src/main/resources/static/css/style.css	all	Added simple site styles (header, brand). /* [C] styles */
+Wire CSS in page	MainScreen.html (and all forms)	~7–9	<link rel="stylesheet" th:href="@{/css/style.css}">
+
+
+Part D — Add “About” page + navigation
+Prompt	File	Line(s)	Change
+Add About page	src/main/resources/templates/about.html	all	New file with brief company description. <!-- [D] about -->
+Controller mapping	src/main/java/com/example/demo/controllers/AboutController.java	all	@Controller with @GetMapping("/about") returning about.
+Nav links to/from About	MainScreen.html header	~22–28	<a th:href="@{/about}">About</a> and About page link back to @{/mainscreen}.
+
+
+Part E — Seed sample inventory (5 parts, 5 products), only when DB is empty
+Prompt	File	Line(s)	Change
+Bootstrap seeding (only when both lists are empty)	src/main/java/com/example/demo/bootstrap/SampleDataLoader.java (or Bootstrap.java)	all	On startup, check productRepository.count()==0 && partRepository.count()==0 then insert sample Parts/Products. // [E] seed
+Use Set for product parts	Product.java	~29	Set<Part> parts = new HashSet<>(); ensures no duplicate parts.
+Duplicate parts become multi-pack	SampleDataLoader.java	~70–110	When attempting duplicates, add “Multi-pack” instead of duplicate entry (basic example logic).
+
+
+Part F — “Buy Now” button (decrement product inventory, message on success/failure)
+Prompt	File	Line(s)	Change
+Add “Buy Now” next to Update/Delete	MainScreen.html (products table)	~122–142	1 button per row: th:href="@{/buyProduct(productID=${tempProduct.id})}". Disables if inv == 0. <!-- [F] buy now -->
+Controller endpoint	src/main/java/com/example/demo/controllers/AddProductController.java	~78–115	@GetMapping("/buyProduct") loads product, decrements inv if >0, sets flash message, redirects to /mainscreen.
+Flash message display	MainScreen.html	~35–45	Show success/failure with th:if="${message}".
+
+Part G — Track min/max inventory on parts, enforce bounds, update forms, rename storage
+Prompt	File	Line(s)	Change
+Add min/max fields to Part	src/main/java/com/example/demo/domain/Part.java	~30–44	Added private int min; private int max; with getters/setters and basic annotations. // [G] fields
+Include min/max in sample data	SampleDataLoader.java	~55–100	When creating parts, set min and max (default min=2 across app as requested).
+Update Inhouse form	templates/InhousePartForm.html	~20–60	Added Min/Max inputs bound to *{min} and *{max}.
+Update Outsourced form	templates/OutsourcedPartForm.html	~20–60	Added Min/Max inputs bound to *{min} and *{max}.
+Enforce inventory between min and max	AddInhousePartController.java / AddOutsourcedPartController.java	~45–85	Server-side checks: min <= inv <= max and min <= max. Bind errors if invalid.
+Rename H2 storage file	src/main/resources/application.properties	~1–5	spring.datasource.url=jdbc:h2:file:~/spring-boot-h2-db102 (renamed from prior).
+
+Part H — Validation messages for min/max violations
+Prompt	File	Line(s)	Change
+Show error adding/updating parts when inv < min or inv > max	AddInhousePartController.java	~55–80	br.rejectValue("inv", "...", "…") messages; return form with errors.
+Show error when adding/updating products would drop a part below min	AddProductController.java	~120–155	On save/update, if product composition reduces part inventory < min (or on purchase), reject with message and keep user on form.
+Show error when min > max	AddInhousePartController.java / AddOutsourcedPartController.java	~48–60	br.rejectValue("min", "min.gt.max", "...").
+
+Part I — Unit tests (at least two) for min/max
+Prompt	File	Line(s)	Change
+min <= inv <= max happy-path	src/test/java/com/example/demo/domain/PartTest.java	~25–55	Creates part with min=2, inv=5, max=10; asserts valid.
+Detect inv < min and inv > max	PartTest.java	~57–110	Two tests asserting validator/logic rejects out-of-range values.
+Optional product min-protection	src/test/java/com/example/demo/service/ProductServiceTest.java	~20–60	Ensures update/add product won’t drop any associated part below min.
+
+Part J — Remove unused validators
+Prompt	File	Line(s)	Change
+Deleted unused validator classes	src/main/java/com/example/demo/validators/*	—	Removed any unused validators (kept EnufPartsValidator, ValidProductPrice only if used).
+Clean imports	various	—	Removed unused imports and dead code.

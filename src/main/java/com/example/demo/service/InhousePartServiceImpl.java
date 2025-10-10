@@ -18,7 +18,7 @@ import java.util.Optional;
  */
 @Service
 public class InhousePartServiceImpl implements InhousePartService {
-    private InhousePartRepository partRepository;
+    private final InhousePartRepository partRepository;
 
     @Autowired
     public InhousePartServiceImpl(InhousePartRepository partRepository) {

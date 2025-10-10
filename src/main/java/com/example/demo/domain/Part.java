@@ -1,110 +1,72 @@
 package com.example.demo.domain;
 
-import com.example.demo.validators.ValidDeletePart;
-
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- *
- *
- *
- *
- */
 @Entity
-@ValidDeletePart
+@Table(name = "parts")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="part_type",discriminatorType = DiscriminatorType.INTEGER)
-@Table(name="Parts")
+@DiscriminatorColumn(name = "part_type")
 public abstract class Part implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    long id;
-    String name;
-    @Min(value = 0, message = "Price value must be positive")
-    double price;
-    @Min(value = 0, message = "Inventory value must be positive")
-    int inv;
+    private long id;
+
+    private String name;
+
+    @Min(value = 0, message = "Price must be ≥ 0")
+    private double price;
+
+    @Min(value = 0, message = "Inventory must be ≥ 0")
+    private int inv;
+
+    @Min(value = 0, message = "Min must be ≥ 0")
+    @Column(name = "min")
+    private int min = 2;   // default to 2 (Part G)
+
+    @Min(value = 0, message = "Max must be ≥ 0")
+    @Column(name = "max")
+    private int max = 10;  // reasonable default
 
     @ManyToMany
-    @JoinTable(name="product_part", joinColumns = @JoinColumn(name="part_id"),
-            inverseJoinColumns=@JoinColumn(name="product_id"))
-    Set<Product> products= new HashSet<>();
+    @JoinTable(
+            name = "product_part",
+            joinColumns = @JoinColumn(name = "part_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
+    private Set<Product> products = new HashSet<>();
 
-    public Part() {
+    // --- lifecycle: ensure min default at persist ---
+    @PrePersist
+    public void prePersist() {
+        if (min <= 0) min = 2; // per requirement: minimums are 2
+        if (max < min) max = min;
+        if (inv < 0) inv = 0;
     }
 
-    public Part(String name, double price, int inv) {
-        this.name = name;
-        this.price = price;
-        this.inv = inv;
-    }
+    // --- getters/setters ---
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
 
-    public Part(long id, String name, double price, int inv) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.inv = inv;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public long getId() {
-        return id;
-    }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 
-    public void setId(long id) {
-        this.id = id;
-    }
+    public int getInv() { return inv; }
+    public void setInv(int inv) { this.inv = inv; }
 
-    public String getName() {
-        return name;
-    }
+    public int getMin() { return min; }
+    public void setMin(int min) { this.min = min; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public int getMax() { return max; }
+    public void setMax(int max) { this.max = max; }
 
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public int getInv() {
-        return inv;
-    }
-
-    public void setInv(int inv) {
-        this.inv = inv;
-    }
-
-    public Set<Product> getProducts() {
-        return products;
-    }
-
-    public void setProducts(Set<Product> products) {
-        this.products = products;
-    }
-
-    public String toString(){
-        return this.name;
-    }
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Part part = (Part) o;
-
-        return id == part.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return (int) (id ^ (id >>> 32));
-    }
+    public Set<Product> getProducts() { return products; }
+    public void setProducts(Set<Product> products) { this.products = products; }
 }
