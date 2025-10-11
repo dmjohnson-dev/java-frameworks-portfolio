@@ -79,3 +79,14 @@ Part J — Remove unused validators
 Prompt	File	Line(s)	Change
 Deleted unused validator classes	src/main/java/com/example/demo/validators/*	—	Removed any unused validators (kept EnufPartsValidator, ValidProductPrice only if used).
 Clean imports	various	—	Removed unused imports and dead code.
+
+J – Unused validator cleanup
+File: src/main/java/com/example/demo/validators/DeletePartValidator.java (deleted)
+Change: Removed an unused validator class to tidy the codebase (no inbound references).
+
+F. Buy Now button behavior (MainScreen + controller)
+- File: src/main/resources/templates/MainScreen.html
+    - Lines: near top of <div class="container"> added flash messages for ${message} and ${error}
+    - Lines: product table action column: Buy Now button now always enabled (removed th:classappend disabling)
+- File: src/main/java/com/example/demo/controllers/AddProductController.java
+    - Lines: added @GetMapping("/buyProduct"): loads product, checks inv>0, decrements/saves, and sets flash attributes. Shows error if out of stock.
